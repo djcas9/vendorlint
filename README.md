@@ -11,6 +11,16 @@ Usage: vendorlint [-t] package [package ...]
   -v	vendorlint version number
   ```
 
+## Example Output
+
+  ```
+dweb@dweb-linux vendorlint (master*) $ ./bin/vendorlint ./...
+[X] Dependency not vendored: github.com/fatih/color
+  * vendorlint/lint.go:14:2
+[X] Dependency not vendored: github.com/kisielk/gotool
+  * vendorlint/lint.go:15:2
+  ```
+
 ## TODO
 
   * Add extra rules around vendor best practices.
