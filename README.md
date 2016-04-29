@@ -26,6 +26,8 @@ dweb@dweb-linux vendorlint (master*) $ ./bin/vendorlint ./...
   * Add extra rules around vendor best practices.
   * Test logic need to be completed
   * Add tests
+  * https://godoc.org/golang.org/x/tools/go/buildutil#ExpandPatterns
+  * https://godoc.org/golang.org/x/tools/refactor/importgraph#Build
 
 ## Acknowledgments
 
