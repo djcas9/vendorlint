@@ -13,7 +13,7 @@ const (
 	Name = "vendorlint"
 
 	// Version of the application
-	Version = "0.1.0"
+	Version = "0.1.1"
 )
 
 func main() {

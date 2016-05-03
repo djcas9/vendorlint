@@ -23,6 +23,12 @@ var (
 		"vendor/",
 		"Godeps/",
 	}
+
+	// BasePackageWords holds the cwd base paths
+	BasePackageWords = []string{}
+
+	// PackagePaths holds the abs package paths
+	PackagePaths = []string{}
 )
 
 // Import holds metadata useful for reporting
@@ -56,29 +62,53 @@ func NewLinter(config *Config) (*Linter, error) {
 // Report writes all failed vendor deps
 func (l *Linter) Report() {
 	for _, i := range l.Imports {
-
-		if strings.Contains(i.Name,
-			filepath.Base(l.Config.WorkingDirectory)) {
-			continue
-		}
-
-		if _, err := os.Stat(path.Join(l.Config.WorkingDirectory,
-			"vendor", i.Name)); err != nil {
+		if !hasVendorMatch(i.Name) {
 			color.Red("[X] Dependency not vendored: %s\n", i.Name)
 			fmt.Fprintf(os.Stderr, "  * %s\n", i.Position.String())
 		}
 	}
 }
 
+func hasVendorMatch(name string) bool {
+	for _, fp := range PackagePaths {
+		if _, err := os.Stat(path.Join(fp,
+			"vendor", name)); err != nil {
+			return false
+		}
+	}
+
+	return true
+}
+
 func (l *Linter) run() error {
 
 	var files []string
-	for _, imp := range gotool.ImportPaths(flag.Args()) {
+	argPaths := gotool.ImportPaths(flag.Args())
+
+	for _, imp := range argPaths {
+
+		baseName := filepath.Base(imp)
+		fullPath, _ := filepath.Abs(imp)
+
+		if baseName == "." {
+			BasePackageWords = append(BasePackageWords, filepath.Base(l.Config.WorkingDirectory))
+			PackagePaths = append(PackagePaths, l.Config.WorkingDirectory)
+		} else {
+			BasePackageWords = append(BasePackageWords, baseName)
+			PackagePaths = append(PackagePaths, fullPath)
+		}
+
 		filepath.Walk(imp, func(path string,
 			f os.FileInfo, err error) error {
 
 			if strings.Contains(path, ".go") {
-				files = append(files, path)
+				if strings.Contains(path, "_test.go") {
+					if l.Config.Tests {
+						files = append(files, path)
+					}
+				} else {
+					files = append(files, path)
+				}
 			}
 
 			return err
@@ -105,14 +135,19 @@ func (l *Linter) run() error {
 			if !strings.HasPrefix(name, build.Default.GOROOT) &&
 				!isStandardImportPath(ii.Path.Value) {
 
-				if !hasIgnoreKeyboard(name) &&
-					!hasIgnoreKeyboard(position.String()) {
+				if !hasIgnoreKeyboard(name, IgnoreKeywords) &&
+					!hasIgnoreKeyboard(position.String(), IgnoreKeywords) {
 
-					imports = append(imports, Import{
-						Filename: filepath.Base(pt),
-						Name:     name,
-						Position: position,
-					})
+					if !hasIgnoreKeyboard(name, BasePackageWords) {
+
+						imports = append(imports, Import{
+							Filename: filepath.Base(pt),
+							Name:     name,
+							Position: position,
+						})
+
+					}
+
 				}
 			}
 
@@ -124,8 +159,8 @@ func (l *Linter) run() error {
 	return nil
 }
 
-func hasIgnoreKeyboard(p string) bool {
-	for _, i := range IgnoreKeywords {
+func hasIgnoreKeyboard(p string, list []string) bool {
+	for _, i := range list {
 		if strings.Contains(p, i) {
 			return true
 		}
