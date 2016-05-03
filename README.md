@@ -14,7 +14,7 @@ Usage: vendorlint [-t] package [package ...]
 ## Example Output
 
   ```
-dweb@dweb-linux vendorlint (master*) $ ./bin/vendorlint ./...
+dweb@dweb-linux vendorlint (master*) $ ./bin/vendorlint .
 [X] Dependency not vendored: github.com/fatih/color
   * vendorlint/lint.go:14:2
 [X] Dependency not vendored: github.com/kisielk/gotool
@@ -24,10 +24,13 @@ dweb@dweb-linux vendorlint (master*) $ ./bin/vendorlint ./...
 ## TODO
 
   * Add extra rules around vendor best practices.
-  * Test logic need to be completed
   * Add tests
-  * https://godoc.org/golang.org/x/tools/go/buildutil#ExpandPatterns
-  * https://godoc.org/golang.org/x/tools/refactor/importgraph#Build
+
+  * Notes:
+
+    - https://godoc.org/golang.org/x/tools/go/buildutil#ExpandPatterns
+
+    - https://godoc.org/golang.org/x/tools/refactor/importgraph#Build
 
 ## Acknowledgments
 
