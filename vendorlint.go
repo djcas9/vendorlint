@@ -19,13 +19,16 @@ const (
 func main() {
 	flag.Usage = func() {
 		fmt.Fprintln(os.Stderr,
-			fmt.Sprintf("Usage: %s (%s) [-t] package [package ...]", Name, Version),
+			fmt.Sprintf("Usage: %s (%s) [OPTIONS]", Name, Version),
 		)
 
 		flag.PrintDefaults()
 	}
 
 	tests := flag.Bool("t", false, "include test dependencies")
+	missing := flag.Bool("m", false, "report missing dependencies")
+	all := flag.Bool("a", false, "report all dependencies")
+
 	version := flag.Bool("v", false, fmt.Sprintf("%s version number", Name))
 
 	flag.Parse()
@@ -35,23 +38,29 @@ func main() {
 		os.Exit(0)
 	}
 
-	if len(flag.Args()) <= 0 {
+	config := vendorlint.NewConfig()
+	config.Missing = *missing
+	config.All = *all
+	config.Tests = *tests
+	config.Packages = flag.Args()
+
+	if !config.Missing && !config.All {
+		// fmt.Fprintln(os.Stderr, "Error: one report option is needed.")
+		// fmt.Fprintln(os.Stderr, "")
+
 		flag.Usage()
 		os.Exit(0)
 	}
 
-	config := vendorlint.NewConfig()
-	config.Tests = *tests
-	config.Packages = flag.Args()
-
 	if cwd, err := os.Getwd(); err == nil {
 		config.WorkingDirectory = cwd
 	} else {
-		// error!
+		fmt.Fprintln(os.Stderr, err.Error())
+		os.Exit(1)
 	}
 
 	if linter, err := vendorlint.NewLinter(config); err == nil {
-		linter.Report()
+		linter.Report(config)
 	} else {
 		// error!
 	}

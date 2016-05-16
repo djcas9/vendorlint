@@ -60,12 +60,32 @@ func NewLinter(config *Config) (*Linter, error) {
 }
 
 // Report writes all failed vendor deps
-func (l *Linter) Report() {
+func (l *Linter) Report(config *Config) {
+
+	var depcount int
+	var missingcount int
+
 	for _, i := range l.Imports {
-		if !hasVendorMatch(i.Name) {
-			color.Red("[X] Dependency not vendored: %s\n", i.Name)
-			fmt.Fprintf(os.Stderr, "  * %s\n", i.Position.String())
+		if config.All {
+			fmt.Fprintf(os.Stdout, "%s\n", i.Name)
 		}
+
+		if !hasVendorMatch(i.Name) {
+			if config.Missing {
+				color.Red("[X] Dependency not vendored: %s\n", i.Name)
+				fmt.Fprintf(os.Stderr, "  * %s\n", i.Position.String())
+			}
+
+			missingcount++
+		}
+
+		depcount++
+	}
+
+	fmt.Fprintf(os.Stdout, "\nDependency Total: %d Missing: %d\n", depcount, missingcount)
+
+	if missingcount > 0 {
+		os.Exit(1)
 	}
 }
 
