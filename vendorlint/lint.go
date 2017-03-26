@@ -121,8 +121,8 @@ func (l *Linter) run() error {
 		filepath.Walk(imp, func(path string,
 			f os.FileInfo, err error) error {
 
-			if strings.Contains(path, ".go") {
-				if strings.Contains(path, "_test.go") {
+			if strings.HasSuffix(path, ".go") {
+				if strings.HasSuffix(path, "_test.go") {
 					if l.Config.Tests {
 						files = append(files, path)
 					}
