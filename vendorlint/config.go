@@ -7,6 +7,7 @@ type Config struct {
 	Missing          bool
 	Packages         []string
 	Tests            bool
+	Paths            bool
 	WorkingDirectory string
 }
 
@@ -18,5 +19,6 @@ func NewConfig() *Config {
 		Missing:  false,
 		Packages: []string{},
 		Tests:    false,
+		Paths:    false,
 	}
 }

@@ -13,7 +13,7 @@ const (
 	Name = "vendorlint"
 
 	// Version of the application
-	Version = "0.1.1"
+	Version = "0.1.2"
 )
 
 func main() {
@@ -28,6 +28,7 @@ func main() {
 	tests := flag.Bool("t", false, "include test dependencies")
 	missing := flag.Bool("m", false, "report missing dependencies")
 	all := flag.Bool("a", false, "report all dependencies")
+	paths := flag.Bool("p", false, "only output vendor paths")
 
 	version := flag.Bool("v", false, fmt.Sprintf("%s version number", Name))
 
@@ -42,6 +43,7 @@ func main() {
 	config.Missing = *missing
 	config.All = *all
 	config.Tests = *tests
+	config.Paths = *paths
 	config.Packages = flag.Args()
 
 	if !config.Missing && !config.All {
@@ -60,7 +62,7 @@ func main() {
 	}
 
 	if linter, err := vendorlint.NewLinter(config); err == nil {
-		linter.Report(config)
+		linter.Report()
 	} else {
 		// error!
 	}
